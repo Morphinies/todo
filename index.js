@@ -1,39 +1,79 @@
+// localStorage.clear();
 const form = document.getElementById("form");
-const btnsComplete = document.getElementsByClassName("btn-complete");
-for (let btnComplete of btnsComplete) {
-  btnComplete.addEventListener("click", (btnComplete) =>
-    changeStatusOfItem(btnComplete)
-  );
+form.addEventListener("submit", handleSubmit);
+
+if (!localStorage.getItem("todoList")) {
+  localStorage.setItem("todoList", JSON.stringify([]));
+} else {
+  for (let item of JSON.parse(localStorage.getItem("todoList"))) {
+    addItem(item);
+  }
 }
 
-form.addEventListener("submit", addItem);
+function addItemToLS(item) {
+  const list = JSON.parse(localStorage.getItem("todoList"));
+  list.push(item);
+  localStorage.setItem("todoList", JSON.stringify(list));
+}
 
-function addItem(e) {
-  e.preventDefault();
-  const input = document.getElementById("input");
+function delFromLS(item) {
+  const list = JSON.parse(localStorage.getItem("todoList"));
+  const itemId = list.indexOf(item);
+  list.splice(itemId, 1);
+  localStorage.setItem("todoList", JSON.stringify(list));
+}
+
+function addItem(item) {
   const list = document.getElementById("list");
-  // list += document.createElement("li");
-  console.log(input.value);
-  console.log(list.innerHTML);
-
-  const li = document.createElement("li");
-  li.className = "item";
-  const p = document.createElement("p");
-  p.innerText = input.value;
-  const div = document.createElement("div");
-  div.className = "btns";
-  const btn = document.createElement("button");
-  btn.className = "btn btn-complete";
-  const img = document.createElement("img");
-  img.className = "icon";
-  img.src = "imgs/complete.svg";
-  img.alt = "";
-  li.appendChild(p);
-  li.appendChild(div);
-  div.appendChild(btn);
-  btn.appendChild(img);
-
-  list.appendChild(li);
+  if (item) {
+    const li = document.createElement("li");
+    li.className = "item";
+    const p = document.createElement("p");
+    p.innerText = item;
+    const div = document.createElement("div");
+    div.className = "btns";
+    const btnStatus = document.createElement("button");
+    const btnDel = document.createElement("button");
+    btnStatus.onclick = (e) => changeStatusOfItem(e.currentTarget);
+    btnDel.onclick = (e) => delItem(e.currentTarget);
+    btnStatus.className = "btn";
+    btnDel.className = "btn";
+    const imgStatus = document.createElement("img");
+    const imgDel = document.createElement("img");
+    imgDel.className = "icon";
+    imgDel.src = "imgs/delete.svg";
+    imgDel.alt = "";
+    imgStatus.className = "icon";
+    imgStatus.src = "imgs/complete.svg";
+    imgStatus.alt = "";
+    li.appendChild(p);
+    li.appendChild(div);
+    div.appendChild(btnStatus);
+    div.appendChild(btnDel);
+    btnStatus.appendChild(imgStatus);
+    btnDel.appendChild(imgDel);
+    list.appendChild(li);
+  }
 }
 
-function changeStatusOfItem(btnComplete) {}
+function handleSubmit(e) {
+  e.preventDefault();
+  let input = document.getElementById("input");
+  addItemToLS(input.value);
+  addItem(input.value);
+  input.value = "";
+}
+
+function changeStatusOfItem(e) {
+  let curVal = e.firstElementChild;
+  if (curVal.src.endsWith("imgs/complete.svg")) {
+    curVal.src = "imgs/complete-true.svg";
+  } else {
+    curVal.src = "imgs/complete.svg";
+  }
+}
+
+function delItem(e) {
+  e.parentNode.parentNode.remove();
+  delFromLS(e.parentNode.parentNode.firstElementChild.innerText);
+}
